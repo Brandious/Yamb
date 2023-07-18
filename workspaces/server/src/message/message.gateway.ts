@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from './message.service';
-import { WsValidationPipe } from 'src/websocket/ws.validation-pipe';
+import { WsValidationPipe } from '../websocket/ws.validation-pipe';
 
 @UsePipes(new WsValidationPipe())
 @WebSocketGateway()

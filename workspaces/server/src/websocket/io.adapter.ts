@@ -1,5 +1,5 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ServerOptions, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { CONNECTION_EVENT } from '@nestjs/websockets/constants';
 
 export class ServerIoAdapter extends IoAdapter {

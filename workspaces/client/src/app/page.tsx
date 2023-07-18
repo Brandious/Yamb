@@ -4,6 +4,8 @@ import styles from "./page.module.css";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Introduction from "@/components/Introduction";
+import GameManager from "@/components/GameManager";
 
 const socket = io(process.env.NEXT_PUBLIC_WS_API_URL as string, {
   autoConnect: true,
@@ -15,6 +17,8 @@ const socket = io(process.env.NEXT_PUBLIC_WS_API_URL as string, {
 export default function Home() {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
+
+  const [openGame, setOpenGame] = useState(false);
 
   useEffect(() => {
     socket.on("receiveMessage", (msg) => {
@@ -57,7 +61,9 @@ export default function Home() {
       <Typography variant="h1" component="h1" gutterBottom>
         Welcome to YAMB!
       </Typography>
-
+      <Button variant="contained" onClick={() => setOpenGame(true)}>
+        EnterGame
+      </Button>
       <Box>
         <Stack direction="row">
           <TextField onChange={handleChange} variant="filled" />
@@ -79,6 +85,8 @@ export default function Home() {
             ))}
         </Stack>
       </Box>
+
+      {openGame && <GameManager />}
     </main>
   );
 }

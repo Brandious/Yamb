@@ -15,7 +15,7 @@ export class MessageController {
   }
 
   @Get(':id')
-  async getMessageById(@Param('id') id: string): Promise<Message> {
+  async getMessageById(@Param('id') id: string): Promise<Message | null> {
     const message = await this.messagesService.getMessageById(Number(id));
     return message;
   }

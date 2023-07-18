@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
+import { YambModule } from './yamb/yamb.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
 import { DatabaseModule } from './database/database.module';
 import { MessageModule } from './message/message.module';
 import { YambGateway } from './yamb/yamb.gateway';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: ['.env', '.env.local'],
       validationSchema: Joi.object({
         POSTGRES_HOST: Joi.string().required(),
         POSTGRES_PORT: Joi.number().required(),
@@ -20,10 +22,12 @@ import { YambGateway } from './yamb/yamb.gateway';
         PORT: Joi.number(),
       }),
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     MessageModule,
+    YambModule,
   ],
   controllers: [AppController],
-  providers: [AppService, YambGateway],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -1,10 +1,14 @@
+"use client";
+
+import { SocketManagerProvider } from "@/websocket/SocketManagerProvider";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { RecoilRoot } from "recoil";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: "YAMB!",
   description: "Yet Another yamb game!",
 };
@@ -16,7 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <RecoilRoot>
+          <SocketManagerProvider>{children} </SocketManagerProvider>
+        </RecoilRoot>
+      </body>
     </html>
   );
 }
