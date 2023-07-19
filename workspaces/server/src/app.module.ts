@@ -6,7 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
 import { DatabaseModule } from './database/database.module';
 import { MessageModule } from './message/message.module';
-import { YambGateway } from './yamb/yamb.gateway';
+
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({

@@ -30,7 +30,6 @@ export class YambGateway implements OnGatewayConnection {
   }
 
   async handleConnection(client: Socket, ...args: any[]) {
-    this.logger.log('OVERHERE', args);
     this.lobbyManager.initializeSocket(client as any);
     this.logger.log('Client connected: ' + client.id);
   }

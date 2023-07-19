@@ -36,6 +36,7 @@ export class LobbyManager {
 
     lobby.instance.delayBetweenRounds = delayBetweenRounds;
     this.lobbies.set(lobby.id, lobby);
+    console.log(lobby);
     return lobby;
   }
 

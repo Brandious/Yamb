@@ -8,23 +8,25 @@ import React, { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import Introduction from "./Introduction";
 import { Box, Typography } from "@mui/material";
+import Game from "./Game";
 
 function GameManager() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+
   const { sm } = useSocketManager();
   const [lobbyState, setLobbyState] = useRecoilState(CurrentLobbyState);
 
   useEffect(() => {
     sm.connect();
+    console.log(sm);
 
     const onLobbyState: Listener<
       ServerPayloads[ServerEvents.LOBBY_STATE]
     > = async (data) => {
-      setLobbyState(data);
-      console.log(searchParams);
-      //   useSearchParams().lobby = data.lobbyId;
       console.log(data);
+
+      setLobbyState(data);
+
       router.push(`/?${data.lobbyId}`);
     };
 
@@ -45,14 +47,11 @@ function GameManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log(lobbyState);
+  console.log(lobbyState, CurrentLobbyState);
+
   if (lobbyState === null) return <Introduction />;
 
-  return (
-    <Box>
-      <Typography> Game should be here</Typography>
-    </Box>
-  );
+  return <Game />;
   //   return <Game />;
 }
 

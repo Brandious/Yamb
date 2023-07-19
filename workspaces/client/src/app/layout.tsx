@@ -8,10 +8,6 @@ import { RecoilRoot } from "recoil";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const metadata: Metadata = {
-  title: "YAMB!",
-  description: "Yet Another yamb game!",
-};
 
 export default function RootLayout({
   children,
@@ -22,7 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <RecoilRoot>
-          <SocketManagerProvider>{children} </SocketManagerProvider>
+          <SocketManagerProvider>{children}</SocketManagerProvider>
         </RecoilRoot>
       </body>
     </html>
