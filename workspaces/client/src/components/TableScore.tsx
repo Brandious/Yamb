@@ -54,7 +54,7 @@ function TableScore({
 
     setRound((prev: number) => prev + 1);
     // setFinishRound(false);
-    setFinishRound(true);
+    setFinishRound();
     setEnterScore(false);
   };
 
@@ -96,12 +96,7 @@ function TableScore({
               </TableCell>
               {rows.length - 1 !== index && (
                 <TableCell align="right">
-                  <Button
-                    disabled={row.score !== 0 || !enterScore}
-                    onClick={() => handleSave(index)}
-                  >
-                    Save
-                  </Button>
+                  <Button onClick={() => handleSave(index)}>Save</Button>
                 </TableCell>
               )}
             </TableRow>

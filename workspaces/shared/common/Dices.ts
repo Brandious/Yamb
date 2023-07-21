@@ -25,7 +25,6 @@ export enum Results {
   FullHouse = 15,
   Chance = 16,
   Yamb = 17,
-  Total = 18,
 }
 
 export const NUMBER_OF_DICES = 5;

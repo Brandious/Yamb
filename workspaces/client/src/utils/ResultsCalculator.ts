@@ -23,6 +23,7 @@ export const results = new Map<Results, number>([
 ]);
 
 export function calculateIndividualResults(dices: Dices[], category: number) {
+  if (!dices) return 0;
   return dices.reduce((acc, curr) => {
     if (curr === category) {
       return acc + curr;
@@ -132,11 +133,13 @@ export function calculateYamb(dices: Dices[]) {
   return isYamb ? 50 : 0;
 }
 
-export function calculateTotal(results: Map<Results, number>) {
-  return [...results.values()].reduce((acc, curr) => acc + curr, 0);
-}
+// export function calculateTotal(results: Map<Results, number>) {
+//   return [...results.values()].reduce((acc, curr) => acc + curr, 0);
+// }
 
 export function calculateResults(dices: Dices[]) {
+  if (!dices) return;
+
   [1, 2, 3, 4, 5, 6].forEach((dice) => {
     results.set(dice as Results, calculateIndividualResults(dices, dice));
   });
@@ -158,7 +161,7 @@ export function calculateResults(dices: Dices[]) {
   results.set(Results.Chance, calculateChance(dices));
   results.set(Results.Yamb, calculateYamb(dices));
 
-  results.set(Results.Total, calculateTotal(results));
+  // results.set(Results.Total, calculateTotal(results));
 
   return results;
 }

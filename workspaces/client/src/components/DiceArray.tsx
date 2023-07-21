@@ -15,9 +15,10 @@ function DiceArray({
   setFinishRound,
   enterScore,
   setEnterScore,
+  rollDice,
+  diceArray,
+  setDiceArray,
 }: any) {
-  const [diceArray, setDiceArray] = React.useState([0, 0, 0, 0, 0]);
-
   const [holdDice, setHoldDice] = React.useState([
     false,
     false,
@@ -40,29 +41,29 @@ function DiceArray({
     });
   };
 
-  const handleDiceRoll = () => {
-    // setDiceArray((prev) => [...prev.sort(() => Math.random() - 0.5)]);
+  // const handleDiceRoll = () => {
+  //   // setDiceArray((prev) => [...prev.sort(() => Math.random() - 0.5)]);
 
-    if (roles >= NUMBER_OF_ROLES || holdDice.every((el) => el)) {
-      setFinishRound(true);
-      setHoldDice([true, true, true, true, true]);
-      setEnterScore(true);
-      return;
-    }
+  //   if (roles >= NUMBER_OF_ROLES || holdDice.every((el) => el)) {
+  //     setFinishRound(true);
+  //     setHoldDice([true, true, true, true, true]);
+  //     setEnterScore(true);
+  //     return;
+  //   }
 
-    setDiceArray((prev) => {
-      return [
-        ...prev.map((dice, index) => {
-          if (holdDice[index]) return dice;
-          return Math.floor(Math.random() * 6 + 1);
-        }),
-      ];
-    });
+  //   setDiceArray((prev) => {
+  //     return [
+  //       ...prev.map((dice, index) => {
+  //         if (holdDice[index]) return dice;
+  //         return Math.floor(Math.random() * 6 + 1);
+  //       }),
+  //     ];
+  //   });
 
-    setRoles((prev) => prev + 1);
+  //   setRoles((prev) => prev + 1);
 
-    // setHoldDice([false, false, false, false, false]);
-  };
+  //   // setHoldDice([false, false, false, false, false]);
+  // };
 
   const handleFinishRound = () => {
     setRoles(0);
@@ -73,6 +74,7 @@ function DiceArray({
     // setRound((prev) => prev + 1);
   };
 
+  console.log(diceArray);
   return (
     <Box
       sx={{
@@ -91,7 +93,7 @@ function DiceArray({
         }}
       >
         {diceArray &&
-          diceArray.map((dice, index) => {
+          diceArray.map((dice: any, index: number) => {
             return (
               <Box
                 key={`diceChange-${dice}-${index}`}
@@ -145,7 +147,7 @@ function DiceArray({
           disabled={finishRound || enterScore}
           variant="contained"
           color="primary"
-          onClick={handleDiceRoll}
+          onClick={rollDice}
         >
           {roles === 3 ? "Enter Score" : "Roll Dices"}
         </Button>

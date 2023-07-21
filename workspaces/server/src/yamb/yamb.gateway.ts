@@ -70,9 +70,37 @@ export class YambGateway implements OnGatewayConnection {
     client.data.lobby.removeClient(client);
   }
 
-  // @SubscribeMessage(ClientEvents.START_GAME)
-  // @SubscribeMessage(ClientEvents.START_TURN)
-  // @SubscribeMessage(ClientEvents.ROLL_DICE)
-  // @SubscribeMessage(ClientEvents.END_TURN)
-  // @SubscribeMessage(ClientEvents.END_GAME)
+  @SubscribeMessage(ClientEvents.CLIENT_READY)
+  onClientReady(client: AuthenticatedSocket): void {
+    this.logger.log('Client ready');
+    client.data.lobby.instance.clientReady();
+  }
+
+  @SubscribeMessage(ClientEvents.START_GAME)
+  onGameStart(client: AuthenticatedSocket): void {
+    this.logger.log('Starting game');
+    client.data.lobby.instance.triggerStart();
+  }
+
+  @SubscribeMessage(ClientEvents.START_ROUND)
+  onRoundStart(client: AuthenticatedSocket): void {
+    this.logger.log('Starting round');
+    client.data.lobby.instance.triggerRoundStart();
+  }
+
+  @SubscribeMessage(ClientEvents.ROLL_DICE)
+  onRollDice(client: AuthenticatedSocket): void {
+    this.logger.log('Rolling dice');
+    client.data.lobby.instance.rollDices();
+  }
+
+  @SubscribeMessage(ClientEvents.END_ROUND)
+  onRoundEnd(client: AuthenticatedSocket): void {
+    this.logger.log('Ending round');
+  }
+
+  @SubscribeMessage(ClientEvents.END_GAME)
+  onGameEnd(client: AuthenticatedSocket): void {
+    this.logger.log('Ending game');
+  }
 }

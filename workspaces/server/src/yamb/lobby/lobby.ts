@@ -62,9 +62,10 @@ export class Lobby {
       hasFinished: this.instance.hasFinished,
       currentRound: this.instance.currentRound,
       playersCount: this.clients.size,
-      dices: this.instance.dices.map((el) => el.toDefinition()),
+      dices: this.instance.dices.toDefinition(),
       isSuspended: this.instance.isSuspended,
       scores: this.instance.scores,
+      clientsReady: this.instance.readyClients,
     };
 
     this.dispatchToLobby(ServerEvents.LOBBY_STATE, payload);

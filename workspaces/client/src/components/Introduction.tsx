@@ -26,7 +26,6 @@ function Introduction() {
   }, [searchParams]);
 
   const onCreateLobby = (mode: "solo" | "multiple") => {
-    console.log(mode);
     sm.emit({
       event: ClientEvents.CREATE_LOBBY,
       data: {
@@ -34,10 +33,9 @@ function Introduction() {
         delayBetweenRounds: delayBetweenRounds,
       },
     });
-    console.log(socket, sm);
     // emitEvent("lobby_create");
   };
-  console.log(sm);
+
   return (
     <Box
       sx={{
