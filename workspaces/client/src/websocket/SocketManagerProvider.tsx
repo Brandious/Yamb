@@ -14,7 +14,7 @@ type ProviderProps = {
 
 export function SocketManagerProvider({ children }: ProviderProps) {
   socketManager.setSocketState = useSetRecoilState(SocketState);
-  console.log(socketManager);
+
   return (
     <SocketManagerContext.Provider value={socketManager}>
       {children}

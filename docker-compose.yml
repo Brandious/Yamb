@@ -1,0 +1,37 @@
+version: "3.7"
+
+services:
+  db:
+    container_name: yamb-db
+    image: postgres:12.1-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: yamb
+    ports:
+      - "5452:5432"
+    volumes:
+      - ./docker/database/data:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: .
+      dockerfile: ./docker/server/Dockerfile
+    ports:
+      - "3875:3000"
+    restart: unless-stopped
+    depends_on:
+      - db
+
+  client:
+    container_name: yamb-client
+    build:
+      context: .
+      dockerfile: ./docker/client/Dockerfile
+    ports:
+      - "3876:3000"
+    restart: unless-stopped
+    depends_on:
+      - db
+      - server

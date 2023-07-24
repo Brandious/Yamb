@@ -36,7 +36,7 @@ export class LobbyManager {
 
     lobby.instance.delayBetweenRounds = delayBetweenRounds;
     this.lobbies.set(lobby.id, lobby);
-    console.log(lobby);
+
     return lobby;
   }
 
@@ -69,7 +69,7 @@ export class LobbyManager {
           },
         );
 
-        lobby.instance.triggerFinish();
+        // lobby.instance.triggerFinish();
         this.lobbies.delete(lobbyId);
       }
     }

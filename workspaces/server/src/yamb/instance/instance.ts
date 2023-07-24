@@ -5,7 +5,8 @@ import { ServerPayloads } from '../../../../shared/server/ServerPayloads';
 import { SECOND } from '../../constants';
 
 import { Lobby } from '../lobby/lobby';
-import { Dices } from '../../../../shared/common/Dices';
+import { NUMBER_OF_ROUNDS } from '../../../../shared/common/Dices';
+import { AuthenticatedSocket } from '@app/websocket/types';
 
 export class Instance {
   public hasStarted = false;
@@ -14,19 +15,24 @@ export class Instance {
   public readyClients = 0;
   public roles = 0;
   public currentRound = 1;
-  public dices: DiceState;
-  public scores: Record<Socket['id'], number> = {};
+  public dices: DiceState = new DiceState();
+  public clientReadyMap: Map<Socket['id'], boolean> = new Map();
+  public scores: Map<Socket['id'], number> = new Map();
 
   public delayBetweenRounds = 2;
 
   public numberOfRolesForCurrentRound: Record<number, Socket['id']> = {};
 
-  constructor(private readonly lobby: Lobby) {
-    this.initializeDices();
-  }
+  constructor(private readonly lobby: Lobby) {}
 
-  public clientReady() {
+  public clientReady(client: AuthenticatedSocket) {
     this.readyClients++;
+
+    this.clientReadyMap.set(client.id, true);
+    this.dices.initializeDices(client);
+    this.hasStarted = true;
+
+    this.lobby.dispatchLobbyState(client);
   }
 
   public triggerStart() {
@@ -45,26 +51,28 @@ export class Instance {
     }
 
     this.hasStarted = true;
-    this.triggerRoundStart();
 
-    this.lobby.dispatchToLobby<ServerPayloads[ServerEvents.GAME_MESSAGE]>(
-      ServerEvents.GAME_MESSAGE,
-      {
-        color: 'blue',
-        message: 'Game started',
-      },
-    );
+    // this.lobby.clients.forEach((client) => {
+    //   this.dices.initializeDices(client);
+    // });
+
+    this.triggerRoundStart();
   }
 
   public triggerRoundStart() {
     console.log('Round started');
 
-    // create empty array of Dices
-    const dices: Dices[] = [];
-    // create new DiceState
-    this.dices = new DiceState(dices, 0, 0, new Map(), null);
-    // set roles to 0
-    this.roles = 0;
+    this.lobby.clients.forEach((client) => {
+      const diceState = this.dices.diceState.get(client.id);
+
+      if (!diceState) return;
+
+      diceState.rolls = 0;
+      diceState.round = this.currentRound;
+      diceState.dices = [];
+      diceState.holds = [false, false, false, false, false];
+      diceState.owner = client.id;
+    });
 
     this.lobby.dispatchToLobby<ServerPayloads[ServerEvents.GAME_MESSAGE]>(
       ServerEvents.GAME_MESSAGE,
@@ -75,57 +83,78 @@ export class Instance {
     );
   }
 
-  public triggerFinish() {
+  public triggerFinish(client: AuthenticatedSocket, clientId: string) {
     if (this.hasFinished || !this.hasStarted) return;
 
-    this.hasFinished = true;
-    this.lobby.dispatchToLobby<ServerPayloads[ServerEvents.GAME_MESSAGE]>(
-      ServerEvents.GAME_MESSAGE,
-      {
-        color: 'blue',
-        message: 'Game finished',
-      },
-    );
+    const diceState = this.dices.diceState.get(clientId);
+
+    if (diceState?.round === NUMBER_OF_ROUNDS) {
+      this.hasFinished = true;
+      this.lobby.dispatchToLobby<ServerPayloads[ServerEvents.GAME_MESSAGE]>(
+        ServerEvents.GAME_MESSAGE,
+        {
+          color: 'blue',
+          message: 'Game finished',
+        },
+      );
+    }
+
+    this.lobby.dispatchLobbyState(client);
   }
 
-  //   TODO: ADD LOGIC TO IT
-  public rollDices() {
+  //TODO: Hold Support missing
+  public rollDices(
+    client: AuthenticatedSocket,
+    clientId: string,
+    holdDice: any,
+  ) {
     console.log('Rolling dices');
 
-    this.dices.dice = [
-      Dices.One,
-      Dices.Two,
-      Dices.Three,
-      Dices.Four,
-      Dices.Five,
-    ];
-    this.dices.rolls++;
-    console.log(this.dices);
-    this.lobby.dispatchLobbyState();
+    if (!this.dices) throw 'Something is wrong';
+
+    this.dices.roll(clientId, holdDice);
+
+    if (this.dices.getRollCount(clientId))
+      return this.addScore(client, clientId);
+
+    this.lobby.dispatchLobbyState(client);
   }
 
-  public addScore() {
-    console.log('Adding score');
-    this.transitionToNextRound();
-  }
-
-  private transitionToNextRound() {
+  public addScore(client: AuthenticatedSocket, clientId: string) {
     this.isSuspended = true;
+
+    this.dices.calculateScores(clientId);
+
+    this.lobby.dispatchLobbyState(client);
+
+    // this.transitionToNextRound(client, clientId);
+  }
+
+  public transitionToNextRound(
+    client: AuthenticatedSocket,
+    clientId: string,
+    data: any,
+  ) {
+    const diceState = this.dices.diceState.get(clientId);
+
+    if (!diceState) throw "Can't transitionToNextRound";
 
     setTimeout(() => {
       this.isSuspended = false;
-      this.currentRound++;
+
       this.numberOfRolesForCurrentRound = {};
+      this.dices.setResults(clientId, data);
 
-      //   const numberOfRoles = new Map<Dices, DiceState>();
+      this.scores.set(
+        clientId,
+        diceState.results.reduce((a, b) => a + b, 0),
+      );
+
+      if (this.currentRound === NUMBER_OF_ROUNDS) {
+        this.triggerFinish(client, clientId);
+      }
+
+      this.lobby.dispatchLobbyState(client);
     }, this.delayBetweenRounds * SECOND);
-
-    console.log('Transitioning');
-  }
-
-  private initializeDices() {
-    const dices: Dices[] = [];
-
-    this.dices = new DiceState(dices, 0, 0, new Map(), null);
   }
 }

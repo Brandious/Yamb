@@ -10,9 +10,9 @@ export type ServerPayloads = {
     hasFinished: boolean;
     currentRound: number;
     playersCount: number;
-    dices: DiceStateDefinition;
+    dices?: DiceStateDefinition | null;
     isSuspended: boolean;
-    scores: Record<string, number>;
+    scores: any;
     clientsReady: number;
   };
 

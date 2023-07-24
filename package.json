@@ -9,10 +9,11 @@
     ]
   },
   "scripts": {
+    "build:server": "yarn workspace @yamb/server build",
     "start:dev:client": "yarn workspace @yamb/client start:dev",
     "start:dev:server": "yarn workspace @yamb/server start:dev",
     "start:prod:client": "yarn workspace @yamb/client start:prod",
-    "start:prod:server": "yarn workspace @yamb/server start:prod"
+    "start:prod:server": "yarn workspace @yamb/server build && yarn workspace @yamb/server start:prod"
   },
   "private": true,
   "repository": "https://github.com/Brandious/Yamb.git",

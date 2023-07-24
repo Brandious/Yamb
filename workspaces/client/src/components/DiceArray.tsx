@@ -18,28 +18,18 @@ function DiceArray({
   rollDice,
   diceArray,
   setDiceArray,
+  suspended,
+  setHoldDice,
+  holdDice,
+  handleDiceHold,
 }: any) {
-  const [holdDice, setHoldDice] = React.useState([
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
-
   const [roles, setRoles] = React.useState(0);
 
-  useEffect(() => {
-    setResults(calculateResults(diceArray));
+  // useEffect(() => {
+  //   setResults(calculateResults(diceArray));
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [diceArray]);
-
-  const handleDiceHold = (index: number) => {
-    setHoldDice((prev) => {
-      return [...prev.slice(0, index), !prev[index], ...prev.slice(index + 1)];
-    });
-  };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [diceArray]);
 
   // const handleDiceRoll = () => {
   //   // setDiceArray((prev) => [...prev.sort(() => Math.random() - 0.5)]);
@@ -74,7 +64,6 @@ function DiceArray({
     // setRound((prev) => prev + 1);
   };
 
-  console.log(diceArray);
   return (
     <Box
       sx={{
@@ -127,7 +116,7 @@ function DiceArray({
 
                 {Boolean(dice) &&
                   holdDice[index] &&
-                  !holdDice.every((el) => el) && (
+                  !holdDice.every((el: any) => el) && (
                     <Button
                       variant="contained"
                       color="warning"
@@ -144,25 +133,13 @@ function DiceArray({
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         <Button
-          disabled={finishRound || enterScore}
+          disabled={suspended}
           variant="contained"
           color="primary"
           onClick={rollDice}
         >
           {roles === 3 ? "Enter Score" : "Roll Dices"}
         </Button>
-
-        {finishRound && (
-          <Button
-            variant="contained"
-            color="secondary"
-            disabled={enterScore}
-            // sx={{ display: finishRound ? "none" : "inherit" }}
-            onClick={handleFinishRound}
-          >
-            Finish Round
-          </Button>
-        )}
       </Box>
     </Box>
   );

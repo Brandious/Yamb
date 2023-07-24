@@ -2,5 +2,6 @@
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
-  "entryFile": "server/src/main"
+  "entryFile": "server/src/main",
+  "distDir": "./dist/server"
 }

@@ -73,30 +73,37 @@ export class YambGateway implements OnGatewayConnection {
   @SubscribeMessage(ClientEvents.CLIENT_READY)
   onClientReady(client: AuthenticatedSocket): void {
     this.logger.log('Client ready');
-    client.data.lobby.instance.clientReady();
+    client.data.lobby.instance.clientReady(client);
   }
 
   @SubscribeMessage(ClientEvents.START_GAME)
   onGameStart(client: AuthenticatedSocket): void {
     this.logger.log('Starting game');
-    client.data.lobby.instance.triggerStart();
+    client.data.lobby.instance.triggerStart(client);
   }
 
   @SubscribeMessage(ClientEvents.START_ROUND)
   onRoundStart(client: AuthenticatedSocket): void {
     this.logger.log('Starting round');
-    client.data.lobby.instance.triggerRoundStart();
+    client.data.lobby.instance.triggerRoundStart(client);
   }
 
   @SubscribeMessage(ClientEvents.ROLL_DICE)
-  onRollDice(client: AuthenticatedSocket): void {
-    this.logger.log('Rolling dice');
-    client.data.lobby.instance.rollDices();
+  onRollDice(
+    client: AuthenticatedSocket,
+    data: { clientId: string; holdDice: any[] },
+  ): void {
+    this.logger.log('Rolling dice', data.clientId);
+    client.data.lobby.instance.rollDices(client, data.clientId, data.holdDice);
   }
 
   @SubscribeMessage(ClientEvents.END_ROUND)
-  onRoundEnd(client: AuthenticatedSocket): void {
+  onRoundEnd(
+    client: AuthenticatedSocket,
+    data: { index: number; result: number },
+  ): void {
     this.logger.log('Ending round');
+    client.data.lobby.instance.transitionToNextRound(client, client.id, data);
   }
 
   @SubscribeMessage(ClientEvents.END_GAME)

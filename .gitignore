@@ -1,1 +1,4 @@
 node_modules
+/workspaces/database
+/pgdata
+/docker/database/data

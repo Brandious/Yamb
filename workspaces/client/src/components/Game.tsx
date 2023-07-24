@@ -8,6 +8,7 @@ import useSocketManager from "@/hooks/useSocketManager";
 import { CurrentLobbyState } from "@/hooks/states";
 import { useRecoilValue } from "recoil";
 import { ClientEvents } from "@yamb/shared/client/ClientEvents";
+import { Results } from "@yamb/shared/common/Dices";
 
 function Game() {
   const { sm } = useSocketManager();
@@ -16,14 +17,25 @@ function Game() {
 
   const clientId = sm.getSocketId()!;
 
-  console.log(clientId, currentLobbyState, sm);
-
-  const [results, setResults] = React.useState();
+  const [results, setResults] = React.useState<Map<Results, number>>();
   const [round, setRound] = React.useState(1);
   const [playerScore, setPlayerScore] = React.useState(categories);
   const [finishRound, setFinishRound] = React.useState(false);
   const [userEnteredScore, setEnterScore] = React.useState(false);
   const [diceArray, setDiceArray] = React.useState([0, 0, 0, 0, 0]);
+  const [holdDice, setHoldDice] = React.useState([
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
+
+  const handleDiceHold = (index: number) => {
+    setHoldDice((prev) => {
+      return [...prev.slice(0, index), !prev[index], ...prev.slice(index + 1)];
+    });
+  };
 
   const clientReady = () => {
     sm.emit({
@@ -40,19 +52,32 @@ function Game() {
   };
 
   const rollDices = async () => {
+    if (!currentLobbyState?.dices?.owner) {
+      alert("Game didn't start yet");
+      return;
+    }
+
     await sm.emit({
       event: ClientEvents.ROLL_DICE,
-      data: {},
+      data: {
+        clientId,
+        holdDice,
+      },
     });
 
-    console.log(currentLobbyState?.dices);
+    // setHoldDice([false, false, false, false, false]);
   };
 
-  const handleFinishRound = () => {
+  const handleFinishRound = (index: number, result: number) => {
     sm.emit({
       event: ClientEvents.END_ROUND,
-      data: {},
+      data: {
+        index: index,
+        result: result,
+      },
     });
+
+    setHoldDice([false, false, false, false, false]);
   };
 
   const handleEndGame = () => {
@@ -63,9 +88,20 @@ function Game() {
       });
   };
 
+  const mapArrayToScore = (array: number[]) => {
+    const newMap = new Map<Results, number>();
+    array &&
+      array?.map((item, index) => {
+        newMap.set((index + 1) as Results, item);
+      });
+
+    return newMap;
+  };
+
   useEffect(() => {
     setDiceArray(currentLobbyState?.dices?.dices!);
-  }, [currentLobbyState?.dices?.dices]);
+    setResults(mapArrayToScore(currentLobbyState?.dices?.scores!)!);
+  }, [currentLobbyState?.dices?.dices, currentLobbyState?.dices?.scores]);
 
   useEffect(() => {
     handleEndGame();
@@ -79,7 +115,27 @@ function Game() {
     console.log("Copied to clipboard");
   };
 
-  console.log(diceArray);
+  const handleSave = (index: number) => {
+    setPlayerScore((prev: any) => {
+      return [
+        ...prev.map((el: any, i: number) => {
+          if (i === index) {
+            return {
+              ...el,
+              score: results?.get(index + 1),
+              isFilled: true,
+            };
+          }
+          return el;
+        }),
+      ];
+    });
+
+    // setFinishRound(false);
+    handleFinishRound(index, results?.get(index + 1)!);
+    setEnterScore(false);
+  };
+
   return (
     <Box
       sx={{
@@ -91,33 +147,75 @@ function Game() {
       }}
     >
       <Typography variant="h1"> Yamb </Typography>
-      <Typography variant="body1">{round}. round</Typography>
+      <Typography variant="body1">
+        {currentLobbyState?.dices?.round}. round
+      </Typography>
       <Button onClick={clientReady} variant={"contained"}>
         Player ready
       </Button>
 
-      <DiceArray
-        rollDice={rollDices}
-        setResults={setResults}
-        setRound={setRound}
-        finishRound={finishRound}
-        setFinishRound={setFinishRound}
-        enterScore={userEnteredScore}
-        setEnterScore={setEnterScore}
-        diceArray={diceArray}
-        setDiceArray={setDiceArray}
-      />
+      {currentLobbyState?.isSuspended && (
+        <Typography>Game suspended</Typography>
+      )}
 
-      <TableScore
-        rows={playerScore}
-        results={results}
-        setPlayerScore={setPlayerScore}
-        setRound={setRound}
-        setFinishRound={handleFinishRound}
-        setEnterScore={setEnterScore}
-        enterScore={userEnteredScore}
-      />
+      {!currentLobbyState?.hasFinished && currentLobbyState?.dices ? (
+        <>
+          <DiceArray
+            rollDice={rollDices}
+            setResults={setResults}
+            setRound={setRound}
+            finishRound={currentLobbyState?.isSuspended}
+            setFinishRound={setFinishRound}
+            enterScore={userEnteredScore}
+            setEnterScore={setEnterScore}
+            diceArray={diceArray}
+            setDiceArray={setDiceArray}
+            suspended={currentLobbyState?.isSuspended}
+            holdDice={holdDice}
+            setHoldDice={handleDiceHold}
+            handleDiceHold={handleDiceHold}
+          />
 
+          <TableScore
+            rows={playerScore}
+            results={results}
+            setPlayerScore={setPlayerScore}
+            setRound={setRound}
+            setFinishRound={handleFinishRound}
+            setEnterScore={setEnterScore}
+            enterScore={userEnteredScore}
+            handleSave={handleSave}
+            scores={currentLobbyState?.dices?.results}
+            isSuspended={currentLobbyState?.isSuspended}
+          />
+
+          <Box>
+            <Typography variant="body1">
+              {currentLobbyState?.lobbyId}
+            </Typography>
+
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              {currentLobbyState &&
+                currentLobbyState?.scores.map((el: any) => (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                    key={`randomKey${Math.random()}`}
+                  >
+                    <Typography>{el.key}</Typography>
+                    <Typography>{currentLobbyState?.dices?.round}</Typography>
+                    <Typography>{el.value}</Typography>
+                  </Box>
+                ))}
+            </Box>
+          </Box>
+        </>
+      ) : (
+        <Typography>Game finished</Typography>
+      )}
       {!currentLobbyState?.hasStarted && (
         <Box>
           <Button onClick={copyLobbyLink} variant="contained">

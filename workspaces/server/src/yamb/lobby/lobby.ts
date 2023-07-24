@@ -6,6 +6,11 @@ import { Instance } from '../instance/instance';
 import { ServerPayloads } from '../../../../shared/server/ServerPayloads';
 import { ServerEvents } from '../../../../shared/server/ServerEvents';
 
+export interface MapType {
+  key: string;
+  value: number;
+}
+
 export class Lobby {
   public readonly id: string = v4();
   public readonly createdAt: Date = new Date();
@@ -32,7 +37,7 @@ export class Lobby {
       this.instance.triggerStart();
     }
 
-    this.dispatchLobbyState();
+    this.dispatchLobbyState(client);
   }
 
   public removeClient(client: AuthenticatedSocket) {
@@ -40,7 +45,7 @@ export class Lobby {
     client.leave(this.id);
     client.data.lobby = null;
 
-    this.instance.triggerFinish();
+    this.instance.triggerFinish(client, client.id);
 
     this.dispatchToLobby<ServerPayloads[ServerEvents.GAME_MESSAGE]>(
       ServerEvents.GAME_MESSAGE,
@@ -50,10 +55,20 @@ export class Lobby {
       },
     );
 
-    this.dispatchLobbyState();
+    this.dispatchLobbyState(client);
   }
 
-  public dispatchLobbyState(): void {
+  private mapToArray(map: Map<Socket['id'], number>): MapType[] {
+    const array: MapType[] = [];
+
+    map.forEach((value, key) => {
+      array.push({ key, value });
+    });
+
+    return array;
+  }
+
+  public dispatchLobbyState(client: AuthenticatedSocket): void {
     const payload: ServerPayloads[ServerEvents.LOBBY_STATE] = {
       lobbyId: this.id,
       mode: this.maxClients === 1 ? 'solo' : 'multiple',
@@ -62,16 +77,20 @@ export class Lobby {
       hasFinished: this.instance.hasFinished,
       currentRound: this.instance.currentRound,
       playersCount: this.clients.size,
-      dices: this.instance.dices.toDefinition(),
+      dices: this.instance.dices.toDefinition(client) || null,
       isSuspended: this.instance.isSuspended,
-      scores: this.instance.scores,
+      scores: this.mapToArray(this.instance.scores),
       clientsReady: this.instance.readyClients,
     };
 
-    this.dispatchToLobby(ServerEvents.LOBBY_STATE, payload);
+    this.dispatchToLobby(ServerEvents.LOBBY_STATE, payload, client.id);
   }
 
-  public dispatchToLobby<T>(event: ServerEvents, data: T): void {
-    this.server.to(this.id).emit(event, data);
+  public dispatchToLobby<T>(
+    event: ServerEvents,
+    data: T,
+    client: string = this.id,
+  ): void {
+    this.server.to(client).emit(event, data);
   }
 }

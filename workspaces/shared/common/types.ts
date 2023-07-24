@@ -1,9 +1,11 @@
-import { Dices } from "./Dices";
+import { Dices, Results } from "./Dices";
 
 export type DiceStateDefinition = {
   dices: Dices[] | null;
+  holds: boolean[];
   rolls: number;
   round: number;
-  scores: Map<string, number>;
+  scores: number[];
+  results: number[];
   owner: string | null;
 };

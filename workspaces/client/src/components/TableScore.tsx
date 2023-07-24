@@ -25,39 +25,22 @@ interface TableScoreProps {
   setFinishRound: any;
   setEnterScore: any;
   enterScore: any;
+  handleSave: any;
+  isSuspended: boolean;
 }
 
 function TableScore({
   rows,
   results,
   setPlayerScore,
+  scores,
   setRound,
   setFinishRound,
   setEnterScore,
   enterScore,
+  handleSave,
+  isSuspended,
 }: TableScoreProps) {
-  const handleSave = (index: number) => {
-    setPlayerScore((prev: any) => {
-      return [
-        ...prev.map((el: any, i: number) => {
-          if (i === index) {
-            return {
-              ...el,
-              score: results.get(index + 1),
-              isFilled: true,
-            };
-          }
-          return el;
-        }),
-      ];
-    });
-
-    setRound((prev: number) => prev + 1);
-    // setFinishRound(false);
-    setFinishRound();
-    setEnterScore(false);
-  };
-
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -90,13 +73,18 @@ function TableScore({
                 {row.name}
               </TableCell>
               <TableCell align="center">{row.description}</TableCell>
-              <TableCell align="right">{row.score}</TableCell>
+              <TableCell align="right">{scores ? scores[index] : 0}</TableCell>
               <TableCell align="right">
                 +{results ? results.get(index + 1) : 0}
               </TableCell>
               {rows.length - 1 !== index && (
                 <TableCell align="right">
-                  <Button onClick={() => handleSave(index)}>Save</Button>
+                  <Button
+                    disabled={(scores && scores[index]) || !isSuspended}
+                    onClick={() => handleSave(index)}
+                  >
+                    Save
+                  </Button>
                 </TableCell>
               )}
             </TableRow>

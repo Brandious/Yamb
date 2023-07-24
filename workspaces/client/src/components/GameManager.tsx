@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import Introduction from "./Introduction";
-import { Box, Typography } from "@mui/material";
+
 import Game from "./Game";
 
 function GameManager() {
@@ -18,13 +18,10 @@ function GameManager() {
 
   useEffect(() => {
     sm.connect();
-    console.log(sm);
 
     const onLobbyState: Listener<
       ServerPayloads[ServerEvents.LOBBY_STATE]
     > = async (data) => {
-      console.log(data);
-
       setLobbyState(data);
 
       router.push(`/?${data.lobbyId}`);
@@ -47,12 +44,9 @@ function GameManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log(lobbyState, CurrentLobbyState);
-
   if (lobbyState === null) return <Introduction />;
 
   return <Game />;
-  //   return <Game />;
 }
 
 export default GameManager;

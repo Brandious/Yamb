@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start:dev": "next dev -p 3033",
+    "start:dev": "next dev",
     "start:prod": "next build && next start",
     "start": "next start",
     "lint": "next lint"
@@ -22,8 +22,10 @@
     "eslint": "8.45.0",
     "eslint-config-next": "13.4.10",
     "next": "13.4.10",
+    "next-react-svg": "^1.2.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "recoil": "^0.7.7",
     "socket.io-client": "^4.7.1",
     "typescript": "5.1.6"
   }
