@@ -20,4 +20,6 @@ Yamb game based on NestJS and NextJS
     What it does it gives root folder insight and starting point for all other parts of our application. Combines all movebale parts into one single folder structure with root folder as starting point after which we can share code, components and anything else between different segments of our application using @root-name starter.
 
 
-Makefile in the root directory is pretty much self explanitory, before triggering one you should first 
+Makefile in the root directory is pretty much self explanitory, before triggering one you should first insert missing .env fields into files and then trigger make prod or make dev.
+
+
