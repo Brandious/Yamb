@@ -1,5 +1,7 @@
 run dev: 
 	@echo "Starting development server..."
+	cp ./env.backend.sample ./workspace/backend/.env
+	cp ./env.frontend.sample ./workspace/frontend/.env
 	yarn "start:dev:client" & yarn "start:dev:server"
 
 run prod:
